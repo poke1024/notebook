@@ -28,6 +28,7 @@ define([
                 }
             } else {
                 MathJax.Hub.Config({
+                    config: ['TeX-AMS_HTML-full.js', 'Safe.js'],
                     tex2jax: {
                         inlineMath: [ ['$','$'], ["\\(","\\)"] ],
                         displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
