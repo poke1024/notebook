@@ -159,6 +159,7 @@ def find_package_data():
         mj('fonts', 'HTML-CSS', 'STIX-Web', 'woff'),
         mj('extensions', 'TeX'),
         mj('jax', 'input', 'TeX'),
+        mj('jax', 'input', 'MathML'),
         mj('jax', 'output', 'HTML-CSS', 'autoload'),
         mj('jax', 'output', 'HTML-CSS', 'fonts', 'STIX-Web'),
     ]:
