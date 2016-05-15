@@ -11,43 +11,57 @@ define([
     var init = function (kernel_info_data) {
         if (window.MathJax) {
             // MathJax loaded
+            var mathjax_config = {
+                config: ['TeX-AMS_HTML-full.js', 'Safe.js'],
+                tex2jax: {
+                    inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                    displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+                    processEscapes: true,
+                    processEnvironments: true
+                },
+                // Center justify equations in code and markdown cells. Elsewhere
+                // we use CSS to left justify single line equations in code cells.
+                displayAlign: 'center',
+                "HTML-CSS": {
+                    availableFonts: [],
+                    imageFont: null,
+                    preferredFont: null,
+                    webFont: "STIX-Web",
+                    styles: {'.MathJax_Display': {"margin": 0}},
+                    linebreaks: { automatic: true }
+                },
+            };
             if (kernel_info_data.content.mathjax) {
                 // allow Kernel to load extensions like mml2jax.js by letting
                 // MathJax's Ajax loader know the path to the MathJax files
                 MathJax.Ajax.config.root = "/static/components/MathJax";
 
-                var options = kernel_info_data.content.mathjax.options;
-                if (options) { // stuff like processSectionDelay
-                    Object.keys(options).forEach(function(key, index) {
-                        MathJax.Hub[key] = options[key];
-                    }, options);
+				function mergeable(x) {
+					return typeof(x) == 'object' && !Array.isArray(x);
+				}
+
+                function merge(into, from) {
+                    for (var key in from) {
+                        if (from.hasOwnProperty(key)) {
+                            if (into.hasOwnProperty(key) &&
+                                mergeable(into[key]) && mergeable(from[key])) {
+                                merge(into[key], from[key]);
+                            } else {
+                                into[key] = from[key];
+                            }
+                         }
+                     }
+                }
+
+                if (kernel_info_data.content.mathjax.options) { // e.g. processSectionDelay
+                    merge(MathJax.Hub, kernel_info_data.content.mathjax.options);
                 }
 
                 if (kernel_info_data.content.mathjax.config) {
-                    MathJax.Hub.Config(kernel_info_data.content.mathjax.config);
+                    merge(mathjax_config, kernel_info_data.content.mathjax.config);
                 }
-            } else {
-                MathJax.Hub.Config({
-                    config: ['TeX-AMS_HTML-full.js', 'Safe.js'],
-                    tex2jax: {
-                        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-                        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-                        processEscapes: true,
-                        processEnvironments: true
-                    },
-                    // Center justify equations in code and markdown cells. Elsewhere
-                    // we use CSS to left justify single line equations in code cells.
-                    displayAlign: 'center',
-                    "HTML-CSS": {
-                        availableFonts: [],
-                        imageFont: null,
-                        preferredFont: null,
-                        webFont: "STIX-Web",
-                        styles: {'.MathJax_Display': {"margin": 0}},
-                        linebreaks: { automatic: true }
-                    },
-                });
             }
+            MathJax.Hub.Config(mathjax_config);
             MathJax.Hub.Configured();
         } else if (window.mathjax_url !== "") {
             // Don't have MathJax, but should. Show dialog.
